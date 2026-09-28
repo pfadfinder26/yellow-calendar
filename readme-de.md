@@ -1,4 +1,4 @@
-# Calendar 0.3.2
+# Calendar 0.3.3
 
 Zeigt die nächsten Termine aus einem Kalenderlink. Entwickelt von Liam Perlaki.
 

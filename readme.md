@@ -1,4 +1,4 @@
-# Calendar 0.3.2
+# Calendar 0.3.3
 
 Show upcoming dates from a calendar link. Developed by Liam Perlaki.
 

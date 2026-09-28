@@ -3,7 +3,7 @@
 // Based on Datenstrom Yellow, https://datenstrom.se/yellow/
 
 class YellowCalendar {
-    const VERSION = "0.3.2";
+    const VERSION = "0.3.3";
     public $yellow;         // access to API
     public $shown;          // a calendar is on this page? (boolean)
     
@@ -212,7 +212,7 @@ class YellowCalendar {
                     " data-copied=\"".htmlspecialchars($this->yellow->system->get("calendarLabelCopied"))."\"".
                     " href=\"".htmlspecialchars($source["url"])."\">".htmlspecialchars($name)."</a>";
             }
-            $output .= implode(", ", $links)."</p>\n";
+            $output .= implode("\n", $links)."</p>\n";
         }
         $output .= "<p class=\"calendar-link\"><a href=\"".htmlspecialchars($link)."\">";
         $output .= htmlspecialchars($this->yellow->system->get("calendarLabelOpen"))."</a></p>\n";
