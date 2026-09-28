@@ -3,7 +3,7 @@
 // Based on Datenstrom Yellow, https://datenstrom.se/yellow/
 
 class YellowCalendar {
-    const VERSION = "0.3.1";
+    const VERSION = "0.3.2";
     public $yellow;         // access to API
     public $shown;          // a calendar is on this page? (boolean)
     
@@ -141,6 +141,12 @@ class YellowCalendar {
         return null;
     }
 
+    // Check if a link leads to the page that is shown right now
+    public function isLinkingHere($url) {
+        $location = preg_replace("#(/[^/]*:[^/]*)+/?$#", "/", $this->yellow->page->location);
+        return $this->isLinkingTo($url, $this->yellow->system->get("coreServerBase").$location);
+    }
+
     // Check if a link of an event leads to a location of this website
     public function isLinkingTo($url, $location) {
         if (is_string_empty($url)) return false;
@@ -160,7 +166,7 @@ class YellowCalendar {
                 $output .= "<time datetime=\"".htmlspecialchars($this->getDateFormatted($event, $event["start"], "c"))."\">";
                 $output .= htmlspecialchars($this->getDateText($event))."</time>\n";
                 $output .= "<span class=\"calendar-summary\">";
-                if (!is_string_empty($event["url"])) {
+                if (!is_string_empty($event["url"]) && !$this->isLinkingHere($event["url"])) {
                     $output .= "<a href=\"".htmlspecialchars($event["url"])."\">".htmlspecialchars($event["summary"])."</a>";
                 } else {
                     $output .= htmlspecialchars($event["summary"]);
@@ -288,9 +294,10 @@ class YellowCalendar {
             $class = date("Ymd", $timeDay)==date("Ymd") ? " class=\"calendar-today\"" : "";
             $output .= "<td$class><span class=\"calendar-day\">$day</span>";
             foreach ($this->getEventsOfDay($events, $timeDay) as $event) {
-                $tag = is_string_empty($event["url"]) ? "span" : "a";
+                $linking = !is_string_empty($event["url"]) && !$this->isLinkingHere($event["url"]);
+                $tag = $linking ? "a" : "span";
                 $output .= "<$tag class=\"calendar-event\"";
-                if (!is_string_empty($event["url"])) $output .= " href=\"".htmlspecialchars($event["url"])."\"";
+                if ($linking) $output .= " href=\"".htmlspecialchars($event["url"])."\"";
                 if (!is_string_empty($event["color"])) {
                     $output .= " style=\"".htmlspecialchars($this->getColorStyle($event["color"]))."\"";
                 }
