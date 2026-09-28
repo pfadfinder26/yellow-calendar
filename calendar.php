@@ -3,7 +3,7 @@
 // Based on Datenstrom Yellow, https://datenstrom.se/yellow/
 
 class YellowCalendar {
-    const VERSION = "0.2.0";
+    const VERSION = "0.2.1";
     public $yellow;         // access to API
     
     // Handle initialisation
@@ -116,6 +116,10 @@ class YellowCalendar {
                 }
                 if (!is_string_empty($event["location"])) {
                     $output .= "<span class=\"calendar-location\">".htmlspecialchars($event["location"])."</span>\n";
+                }
+                if (!is_string_empty($event["description"])) {
+                    $output .= "<span class=\"calendar-description\">".
+                        nl2br(htmlspecialchars($event["description"]))."</span>\n";
                 }
                 $output .= "<a class=\"calendar-download\" href=\"".htmlspecialchars($this->getEventLocation($event))."\">";
                 $output .= htmlspecialchars($this->yellow->system->get("calendarLabelDownload"))."</a>\n";

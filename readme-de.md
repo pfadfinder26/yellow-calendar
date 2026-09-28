@@ -1,4 +1,4 @@
-# Calendar 0.2.0
+# Calendar 0.2.1
 
 Zeigt die nächsten Termine aus einem Kalenderlink. Entwickelt von Liam Perlaki.
 
@@ -26,7 +26,8 @@ Die Argumente sind der Link, wie viele Termine gezeigt werden, dann beliebig vie
 wöchentlicher Heimabend nicht die ganze Liste füllt. `each:2` nimmt aus jedem Kalender höchstens
 zwei Termine, eine Stufenseite zeigt so die nächsten zwei Heimabende neben den nächsten zwei
 Terminen der Gruppe. `month` zeigt einen Monat als Wochenraster statt als Liste, `months:3` zeigt drei Monate, ab
-diesem. Über der Monatsansicht stehen Links auf die Monate davor und danach, sie kommen ohne JavaScript aus
+diesem. Ein Termin zeigt Ort und Notizen unter dem Titel, wenn sie im Kalender stehen.
+Über der Monatsansicht stehen Links auf die Monate davor und danach, sie kommen ohne JavaScript aus
 und fragen den Monat im Ort ab, `/termine/month:2026-11/`, dazu ein Link zurück zu diesem Monat.
 
 **Nextcloud:** den Kalender in der Kalender-App teilen, „Link kopieren“, und diesen Link genau so

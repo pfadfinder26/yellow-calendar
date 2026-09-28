@@ -1,4 +1,4 @@
-# Calendar 0.2.0
+# Calendar 0.2.1
 
 Show upcoming dates from a calendar link. Developed by Liam Perlaki.
 
@@ -25,6 +25,7 @@ The arguments are the link, how many dates to show, then any number of options:
 fill the whole list. `each:2` takes at most two dates from every calendar, so a section page can
 show the next two Heimabende next to the next two dates of the group. `month` shows a
 month as a grid of weeks instead of a list, `months:3` shows three months, starting with this one.
+A date shows its place and its notes below the title, when the event in the calendar has them.
 Above a month view there are links to the months before and after, they work without JavaScript by
 asking for a month in the location, `/termine/month:2026-11/`, and a link back to this month.
 
