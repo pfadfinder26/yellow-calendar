@@ -3,12 +3,14 @@
 // Based on Datenstrom Yellow, https://datenstrom.se/yellow/
 
 class YellowCalendar {
-    const VERSION = "0.3.0";
+    const VERSION = "0.3.1";
     public $yellow;         // access to API
+    public $shown;          // a calendar is on this page? (boolean)
     
     // Handle initialisation
     public function onLoad($yellow) {
         $this->yellow = $yellow;
+        $this->shown = false;
         $this->yellow->system->setDefault("calendarUrl", "");
         $this->yellow->system->setDefault("calendarLocation", "/calendar-event/");
         $this->yellow->system->setDefault("calendarLink", "");
@@ -18,6 +20,7 @@ class YellowCalendar {
         $this->yellow->system->setDefault("calendarCacheTime", "3600");
         $this->yellow->system->setDefault("calendarLabelOpen", "Open calendar");
         $this->yellow->system->setDefault("calendarLabelSubscribe", "Subscribe");
+        $this->yellow->system->setDefault("calendarLabelCopied", "Link copied");
         $this->yellow->system->setDefault("calendarLabelToday", "This month");
         $this->yellow->system->setDefault("calendarLabelDownload", "Save date");
         $this->yellow->system->setDefault("calendarLabelEmpty", "No dates at the moment.");
@@ -40,6 +43,24 @@ class YellowCalendar {
             "Cache-Control" => "max-age=3600"), $fileData);
     }
     
+    // Handle page extra data, the script that copies a link to subscribe
+    public function onParsePageExtra($page, $name) {
+        if ($name!="footer" || !$this->shown) return null;
+        return "<script type=\"text/javascript\">\n// <![CDATA[\n".
+            "document.addEventListener(\"click\", function (e) {\n".
+            "var link = e.target.closest ? e.target.closest(\"a.calendar-copy\") : null;\n".
+            "if (!link || !navigator.clipboard) return;\n".
+            "e.preventDefault();\n".
+            "navigator.clipboard.writeText(link.href).then(function () {\n".
+            "var text = link.textContent;\n".
+            "link.textContent = link.getAttribute(\"data-copied\");\n".
+            "link.classList.add(\"calendar-copied\");\n".
+            "window.setTimeout(function () {\n".
+            "link.textContent = text;\n".
+            "link.classList.remove(\"calendar-copied\");\n".
+            "}, 1500);\n});\n});\n// ]]>\n</script>\n";
+    }
+
     // Handle page content element
     public function onParseContentElement($page, $name, $text, $attributes, $type) {
         $output = null;
@@ -84,6 +105,7 @@ class YellowCalendar {
                 $output = $this->getCalendarHtml($events, "", $showName, array());
             }
             $output .= $this->getFooterHtml($this->getLinkUrl($url), $sources);
+            $this->shown = true;
         }
         if ($name=="calendarevent" && ($type=="block" || $type=="inline")) {
             list($url) = $this->yellow->toolbox->getTextArguments($text);
@@ -170,7 +192,7 @@ class YellowCalendar {
     
     // Return the links below a calendar, subscribing and opening it
     public function getFooterHtml($link, $sources) {
-        $output = "";
+        $output = "<div class=\"calendar-footer\">\n";
         if (!is_array_empty($sources)) {
             $output .= "<p class=\"calendar-subscribe\">";
             $output .= htmlspecialchars($this->yellow->system->get("calendarLabelSubscribe")).": ";
@@ -179,14 +201,16 @@ class YellowCalendar {
                 $name = is_string_empty($source["name"]) ? $this->yellow->system->get("calendarLabelSubscribe") : $source["name"];
                 $style = is_string_empty($source["color"]) ? "" :
                     " style=\"".htmlspecialchars($this->getColorStyle($source["color"]))."\"";
-                $links[] = "<a class=\"calendar-name ".htmlspecialchars($this->yellow->lookup->normaliseClass($name)).
-                    "\"$style href=\"".htmlspecialchars($source["url"])."\">".htmlspecialchars($name)."</a>";
+                $links[] = "<a class=\"calendar-name calendar-copy ".
+                    htmlspecialchars($this->yellow->lookup->normaliseClass($name))."\"$style".
+                    " data-copied=\"".htmlspecialchars($this->yellow->system->get("calendarLabelCopied"))."\"".
+                    " href=\"".htmlspecialchars($source["url"])."\">".htmlspecialchars($name)."</a>";
             }
             $output .= implode(", ", $links)."</p>\n";
         }
         $output .= "<p class=\"calendar-link\"><a href=\"".htmlspecialchars($link)."\">";
         $output .= htmlspecialchars($this->yellow->system->get("calendarLabelOpen"))."</a></p>\n";
-        $output .= "</div>\n";
+        $output .= "</div>\n</div>\n";
         return $output;
     }
     
@@ -505,9 +529,18 @@ class YellowCalendar {
         $color = $this->getCalendarColor($fileData);
         $timeNow = $timeFrom ? $timeFrom : strtotime("today");
         $timeMax = strtotime("+".intval($this->yellow->system->get("calendarMonthsAhead"))." months");
+        $blocks = array();
+        $replaced = array();
         foreach ($this->getBlocks($fileData) as $block) {
             $event = $this->getEvent($block);
             if (is_null($event)) continue;
+            if ($event["recurrence"]) $replaced[$event["uid"]][] = $event["recurrence"];
+            $blocks[] = $event;
+        }
+        foreach ($blocks as $event) {
+            if (isset($replaced[$event["uid"]]) && !$event["recurrence"]) {
+                $event["exdate"] = array_merge($event["exdate"], $replaced[$event["uid"]]);
+            }
             foreach ($this->getEventDates($event, $timeNow, $timeMax) as $start) {
                 $entry = $event;
                 $entry["end"] = $event["end"] ? $start+($event["end"]-$event["start"]) : 0;
@@ -535,7 +568,7 @@ class YellowCalendar {
         $event = array("uid" => "", "summary" => "", "location" => "", "description" => "",
             "url" => "", "start" => 0, "end" => 0, "allDay" => false, "calendar" => "", "color" => "",
             "timeZone" => date_default_timezone_get(),
-            "rrule" => "", "exdate" => array());
+            "rrule" => "", "exdate" => array(), "recurrence" => 0);
         foreach ($this->yellow->toolbox->getTextLines($block) as $line) {
             if (!preg_match("/^([A-Z\-]+)([^:]*):(.*)$/", trim($line), $matches)) continue;
             list($dummy, $key, $parameters, $value) = $matches;
@@ -544,6 +577,7 @@ class YellowCalendar {
             if ($key=="LOCATION") $event["location"] = $this->getTextUnescaped($value);
             if ($key=="DESCRIPTION") $event["description"] = $this->getTextUnescaped($value);
             if ($key=="RRULE") $event["rrule"] = $value;
+            if ($key=="RECURRENCE-ID") $event["recurrence"] = $this->getTimestamp($value, $parameters);
             if ($key=="URL" && preg_match("/^https?:\/\//", trim($value))) $event["url"] = trim($value);
             if ($key=="EXDATE") {
                 foreach (explode(",", $value) as $date) {

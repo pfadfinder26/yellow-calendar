@@ -1,4 +1,4 @@
-# Calendar 0.3.0
+# Calendar 0.3.1
 
 Zeigt die nächsten Termine aus einem Kalenderlink. Entwickelt von Liam Perlaki.
 
@@ -26,7 +26,14 @@ Die Argumente sind der Link, wie viele Termine gezeigt werden, dann beliebig vie
 wöchentlicher Heimabend nicht die ganze Liste füllt. `each:2` nimmt aus jedem Kalender höchstens
 zwei Termine, eine Stufenseite zeigt so die nächsten zwei Heimabende neben den nächsten zwei
 Terminen der Gruppe. `month` zeigt einen Monat als Wochenraster statt als Liste, `months:3` zeigt drei Monate, ab
-diesem. Ein Termin zeigt Ort und Notizen unter dem Titel, wenn sie im Kalender stehen.
+diesem. Ein Termin zeigt Ort und Notizen unter dem Titel, wenn sie im Kalender stehen. Ein einzeln
+geänderter Termin einer Wiederholung, ein Heimabend, der diese Woche woanders ist, ersetzt diese
+Wiederholung, statt neben ihr zu stehen.
+
+Unter einer Liste stehen die Kalender zum Abonnieren und der Link, der den Ordner in der Cloud
+öffnet. Ein Browser kann nicht selbst abonnieren, deshalb kopiert ein Klick auf einen Kalender
+seinen Link in die Zwischenablage, `CalendarLabelCopied` sagt, was dabei kurz erscheint. Ohne
+JavaScript bleibt der Link ein Link.
 Über der Monatsansicht stehen Links auf die Monate davor und danach, sie kommen ohne JavaScript aus
 und fragen den Monat im Ort ab, `/termine/month:2026-11/`, dazu ein Link zurück zu diesem Monat.
 
