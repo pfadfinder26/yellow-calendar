@@ -1,4 +1,4 @@
-# Calendar 0.3.3
+# Calendar 0.4.0
 
 Zeigt die nächsten Termine aus einem Kalenderlink. Entwickelt von Liam Perlaki.
 
@@ -83,7 +83,7 @@ werden aufgefaltet, `FREQ` täglich, wöchentlich, monatlich und jährlich mit `
 `CalendarLabelOpen`, `CalendarLabelSubscribe`, `CalendarLabelDownload`, `CalendarLabelToday`,
 `CalendarLabelEmpty` die Wörter auf der Seite
 
-Die geholten Kalender liegen in `system/extensions/calendar-*.cache`, damit ein Seitenaufruf nicht
+Die geholten Kalender liegen in `system/cache/calendar-*.cache`, damit ein Seitenaufruf nicht
 auf den anderen Server wartet. Ist ein Kalender nicht erreichbar, gilt die letzte Kopie.
 
 **Datenschutz:** den Kalender holt der eigene Webserver, nicht die Besucher*innen, niemand sonst

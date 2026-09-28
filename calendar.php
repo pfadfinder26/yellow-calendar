@@ -3,7 +3,7 @@
 // Based on Datenstrom Yellow, https://datenstrom.se/yellow/
 
 class YellowCalendar {
-    const VERSION = "0.3.3";
+    const VERSION = "0.4.0";
     public $yellow;         // access to API
     public $shown;          // a calendar is on this page? (boolean)
     
@@ -366,7 +366,7 @@ class YellowCalendar {
     
     // Return an event from the cached calendar, null if it is not there
     public function getEventFromCache($hash, $start) {
-        $fileName = $this->yellow->system->get("coreExtensionDirectory")."calendar-$hash.cache";
+        $fileName = $this->yellow->system->get("coreCacheDirectory")."calendar-$hash.cache";
         if (!is_file($fileName)) return null;
         $fileData = $this->yellow->toolbox->readFile($fileName);
         foreach ($this->getEvents($fileData, 0, $hash) as $event) {
@@ -514,7 +514,7 @@ class YellowCalendar {
     
     // Return calendar data, from cache if it is fresh enough
     public function getCalendarData($url, $cacheOnly = false) {
-        $fileName = $this->yellow->system->get("coreExtensionDirectory")."calendar-".$this->getHash($url).".cache";
+        $fileName = $this->yellow->system->get("coreCacheDirectory")."calendar-".$this->getHash($url).".cache";
         $cacheTime = intval($this->yellow->system->get("calendarCacheTime"));
         if (is_file($fileName) && ($cacheOnly || filemtime($fileName)+$cacheTime>time())) {
             return $this->yellow->toolbox->readFile($fileName);
@@ -525,7 +525,7 @@ class YellowCalendar {
         if ($fileData===false || strposu($fileData, "BEGIN:VCALENDAR")===false) {
             return is_file($fileName) ? $this->yellow->toolbox->readFile($fileName) : null;
         }
-        $this->yellow->toolbox->writeFile($fileName, $fileData);
+        $this->yellow->toolbox->writeFile($fileName, $fileData, true);
         return $fileData;
     }
     

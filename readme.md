@@ -1,4 +1,4 @@
-# Calendar 0.3.3
+# Calendar 0.4.0
 
 Show upcoming dates from a calendar link. Developed by Liam Perlaki.
 
@@ -81,7 +81,7 @@ saving time changes.
 `CalendarLabelOpen`, `CalendarLabelSubscribe`, `CalendarLabelDownload`, `CalendarLabelToday`,
 `CalendarLabelEmpty` the words on the page
 
-The fetched calendars are kept in `system/extensions/calendar-*.cache`, so a visit does not wait for
+The fetched calendars are kept in `system/cache/calendar-*.cache`, so a visit does not wait for
 the other server. A calendar that cannot be reached falls back to the last copy.
 
 **Data protection:** the calendar is fetched by your web server, not by your visitors, so nobody
