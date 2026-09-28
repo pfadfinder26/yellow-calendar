@@ -1,4 +1,4 @@
-# Calendar 0.1.1
+# Calendar 0.2.0
 
 Zeigt die nächsten Termine aus einem Kalenderlink. Entwickelt von Liam Perlaki.
 
@@ -21,9 +21,11 @@ Die Argumente sind der Link, wie viele Termine gezeigt werden, dann beliebig vie
 
     [calendar https://cloud.example.org/apps/calendar/p/TOKEN 5 name:GuSp unique]
 
-`name:GuSp` behält die Kalender, deren Name „GuSp“ enthält. `unique` zeigt einen wiederkehrenden
-Termin nur einmal, mit dem nächsten Datum, damit ein wöchentlicher Heimabend nicht die ganze Liste
-füllt. `month` zeigt einen Monat als Wochenraster statt als Liste, `months:3` zeigt drei Monate, ab
+`name:GuSp` behält die Kalender, deren Name „GuSp“ enthält, `name:GuSp,Events` behält beide.
+`unique` zeigt einen wiederkehrenden Termin nur einmal, mit dem nächsten Mal, damit ein
+wöchentlicher Heimabend nicht die ganze Liste füllt. `each:2` nimmt aus jedem Kalender höchstens
+zwei Termine, eine Stufenseite zeigt so die nächsten zwei Heimabende neben den nächsten zwei
+Terminen der Gruppe. `month` zeigt einen Monat als Wochenraster statt als Liste, `months:3` zeigt drei Monate, ab
 diesem. Über der Monatsansicht stehen Links auf die Monate davor und danach, sie kommen ohne JavaScript aus
 und fragen den Monat im Ort ab, `/termine/month:2026-11/`, dazu ein Link zurück zu diesem Monat.
 

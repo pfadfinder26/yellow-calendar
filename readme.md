@@ -1,4 +1,4 @@
-# Calendar 0.1.1
+# Calendar 0.2.0
 
 Show upcoming dates from a calendar link. Developed by Liam Perlaki.
 
@@ -20,8 +20,10 @@ The arguments are the link, how many dates to show, then any number of options:
 
     [calendar https://cloud.example.org/apps/calendar/p/TOKEN 5 name:GuSp unique]
 
-`name:GuSp` keeps the calendars whose name contains "GuSp". `unique` shows a repeating date only
-once, with its next occurrence, so a weekly Heimabend does not fill the whole list. `month` shows a
+`name:GuSp` keeps the calendars whose name contains "GuSp", `name:GuSp,Events` keeps both of them.
+`unique` shows a repeating date only once, with its next occurrence, so a weekly Heimabend does not
+fill the whole list. `each:2` takes at most two dates from every calendar, so a section page can
+show the next two Heimabende next to the next two dates of the group. `month` shows a
 month as a grid of weeks instead of a list, `months:3` shows three months, starting with this one.
 Above a month view there are links to the months before and after, they work without JavaScript by
 asking for a month in the location, `/termine/month:2026-11/`, and a link back to this month.

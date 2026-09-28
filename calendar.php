@@ -3,7 +3,7 @@
 // Based on Datenstrom Yellow, https://datenstrom.se/yellow/
 
 class YellowCalendar {
-    const VERSION = "0.1.1";
+    const VERSION = "0.2.0";
     public $yellow;         // access to API
     
     // Handle initialisation
@@ -49,9 +49,13 @@ class YellowCalendar {
             $options = array_values(array_filter(array_slice($arguments, 2)));
             $filter = "";
             foreach ($options as $option) {
-                if (strposu($option, ":")!==false) $filter = $option;
+                if (substru($option, 0, 5)=="name:") $filter = $option;
             }
             $unique = in_array("unique", $options);
+            $each = 0;
+            foreach ($options as $option) {
+                if (preg_match("/^each:(\d+)$/", $option, $matches)) $each = intval($matches[1]);
+            }
             $months = in_array("month", $options) ? intval($this->yellow->system->get("calendarMonths")) : 0;
             foreach ($options as $option) {
                 if (preg_match("/^months:(\d+)$/", $option, $matches)) $months = intval($matches[1]);
@@ -70,13 +74,13 @@ class YellowCalendar {
                     "color" => $this->getCalendarColor($fileData));
             }
             $sources = $this->getSourcesSelected($sources, $filter);
-            $showName = is_string_empty($filter) && count($sources)>1;
+            $showName = count($sources)>1;
             $page->setLastModified(time());
             if ($months>0) {
                 $events = $this->getEventsSelected($events, $filter, 0, false);
                 $output = $this->getMonthsHtml($events, $months, $showName, $page);
             } else {
-                $events = $this->getEventsSelected($events, $filter, intval($entries), $unique);
+                $events = $this->getEventsSelected($events, $filter, intval($entries), $unique, $each);
                 $output = $this->getCalendarHtml($events, "", $showName, array());
             }
             $output .= $this->getFooterHtml($this->getLinkUrl($url), $sources);
@@ -378,21 +382,36 @@ class YellowCalendar {
     
     // Return the calendars to show, filtered by name
     public function getSourcesSelected($sources, $filter) {
-        list($key, $value) = $this->yellow->toolbox->getTextList($filter, ":", 2);
-        if ($key=="name" && !is_string_empty($value)) {
-            $sources = array_values(array_filter($sources, function ($source) use ($value) {
-                return stristr($source["name"], $value)!==false;
+        $names = $this->getFilterNames($filter);
+        if (!is_array_empty($names)) {
+            $sources = array_values(array_filter($sources, function ($source) use ($names) {
+                return $this->isMatchingName($source["name"], $names);
             }));
         }
         return $sources;
     }
+
+    // Return the calendar names of a filter, written as name:one,two
+    public function getFilterNames($filter) {
+        list($key, $value) = $this->yellow->toolbox->getTextList($filter, ":", 2);
+        if ($key!="name" || is_string_empty($value)) return array();
+        return array_filter(array_map("trim", explode(",", $value)));
+    }
+
+    // Check if a calendar is one of the names of a filter
+    public function isMatchingName($name, $names) {
+        foreach ($names as $value) {
+            if (stristr($name, $value)!==false) return true;
+        }
+        return false;
+    }
     
     // Return the events to show, filtered by calendar name, sorted and limited
-    public function getEventsSelected($events, $filter, $entries, $unique = false) {
-        list($key, $value) = $this->yellow->toolbox->getTextList($filter, ":", 2);
-        if ($key=="name" && !is_string_empty($value)) {
-            $events = array_filter($events, function ($event) use ($value) {
-                return stristr($event["calendar"], $value)!==false;
+    public function getEventsSelected($events, $filter, $entries, $unique = false, $each = 0) {
+        $names = $this->getFilterNames($filter);
+        if (!is_array_empty($names)) {
+            $events = array_filter($events, function ($event) use ($names) {
+                return $this->isMatchingName($event["calendar"], $names);
             });
         }
         usort($events, function ($a, $b) { return $a["start"]<=>$b["start"]; });
@@ -402,6 +421,14 @@ class YellowCalendar {
                 if (isset($found[$event["uid"]])) return false;
                 $found[$event["uid"]] = true;
                 return true;
+            });
+        }
+        if ($each>0) {
+            $found = array();
+            $events = array_filter($events, function ($event) use (&$found, $each) {
+                $name = $event["calendar"];
+                $found[$name] = isset($found[$name]) ? $found[$name]+1 : 1;
+                return $found[$name]<=$each;
             });
         }
         return array_slice(array_values($events), 0, $entries>0 ? $entries : count($events));
