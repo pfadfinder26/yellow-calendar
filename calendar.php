@@ -3,7 +3,7 @@
 // Based on Datenstrom Yellow, https://datenstrom.se/yellow/
 
 class YellowCalendar {
-    const VERSION = "0.2.1";
+    const VERSION = "0.3.0";
     public $yellow;         // access to API
     
     // Handle initialisation
@@ -85,7 +85,45 @@ class YellowCalendar {
             }
             $output .= $this->getFooterHtml($this->getLinkUrl($url), $sources);
         }
+        if ($name=="calendarevent" && ($type=="block" || $type=="inline")) {
+            list($url) = $this->yellow->toolbox->getTextArguments($text);
+            if (is_string_empty($url)) $url = $this->yellow->system->get("calendarUrl");
+            if (is_string_empty($url)) return $this->getErrorHtml("Please add a calendar link!");
+            $output = $this->getPageEventHtml($page, $url);
+        }
         return $output;
+    }
+
+    // Return the date of this page as a button, when an event of a calendar links here
+    // nothing is fetched for this, the calendars are read the way they lie on this server
+    public function getPageEventHtml($page, $url) {
+        $event = $this->getPageEvent($page, $url);
+        if (is_null($event)) return "";
+        $output = "<p class=\"calendar-add\">";
+        $output .= "<a class=\"button\" href=\"".htmlspecialchars($this->getEventLocation($event))."\">";
+        $output .= htmlspecialchars($this->yellow->system->get("calendarLabelDownload"))."</a>";
+        $output .= "</p>\n";
+        return $output;
+    }
+
+    // Return the next event that links to this page, null if no calendar mentions it
+    public function getPageEvent($page, $url) {
+        $location = $this->yellow->system->get("coreServerBase").$page->location;
+        foreach ($this->getSourceUrls($url) as $sourceUrl) {
+            $fileData = $this->getCalendarData($sourceUrl, true);
+            if (is_null($fileData) || strposu($fileData, $location)===false) continue;
+            foreach ($this->getEvents($fileData, 0, $this->getHash($sourceUrl), strtotime("today")) as $event) {
+                if ($this->isLinkingTo($event["url"], $location)) return $event;
+            }
+        }
+        return null;
+    }
+
+    // Check if a link of an event leads to a location of this website
+    public function isLinkingTo($url, $location) {
+        if (is_string_empty($url)) return false;
+        $path = rtrim(parse_url($url, PHP_URL_PATH), "/");
+        return !is_string_empty($path) && $path==rtrim($location, "/");
     }
     
     // Return calendar HTML
@@ -444,10 +482,10 @@ class YellowCalendar {
     }
     
     // Return calendar data, from cache if it is fresh enough
-    public function getCalendarData($url) {
+    public function getCalendarData($url, $cacheOnly = false) {
         $fileName = $this->yellow->system->get("coreExtensionDirectory")."calendar-".$this->getHash($url).".cache";
         $cacheTime = intval($this->yellow->system->get("calendarCacheTime"));
-        if (is_file($fileName) && filemtime($fileName)+$cacheTime>time()) {
+        if (is_file($fileName) && ($cacheOnly || filemtime($fileName)+$cacheTime>time())) {
             return $this->yellow->toolbox->readFile($fileName);
         }
         $context = stream_context_create(array("http" => array("timeout" => 5,

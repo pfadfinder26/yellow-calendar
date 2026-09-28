@@ -1,4 +1,4 @@
-# Calendar 0.2.1
+# Calendar 0.3.0
 
 Zeigt die nächsten Termine aus einem Kalenderlink. Entwickelt von Liam Perlaki.
 
@@ -29,6 +29,18 @@ Terminen der Gruppe. `month` zeigt einen Monat als Wochenraster statt als Liste,
 diesem. Ein Termin zeigt Ort und Notizen unter dem Titel, wenn sie im Kalender stehen.
 Über der Monatsansicht stehen Links auf die Monate davor und danach, sie kommen ohne JavaScript aus
 und fragen den Monat im Ort ab, `/termine/month:2026-11/`, dazu ein Link zurück zu diesem Monat.
+
+## Einen einzelnen Termin anbieten
+
+Eine Seite, auf die ein Termin im Kalender verlinkt, kann diesen Termin zum Speichern anbieten:
+
+    [calendarevent]
+
+Die Erweiterung sucht den Termin, dessen Website diese Seite ist, und zeigt einen Knopf, der ihn
+als `.ics`-Datei speichert, und gar nichts, wenn kein Kalender die Seite nennt. `CalendarUrl` in
+den Systemeinstellungen sagt, welche Kalender durchsucht werden, ein eigener Link sagt es pro
+Seite. Dafür wird nichts geholt, die Kalender werden so gelesen, wie sie auf dem Server liegen, und
+ein Kalender, der die Seite nicht nennt, wird gar nicht erst zerlegt.
 
 **Nextcloud:** den Kalender in der Kalender-App teilen, „Link kopieren“, und diesen Link genau so
 verwenden. Die Kurzform sagt dasselbe und hält eine Seite lesbar:

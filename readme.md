@@ -1,4 +1,4 @@
-# Calendar 0.2.1
+# Calendar 0.3.0
 
 Show upcoming dates from a calendar link. Developed by Liam Perlaki.
 
@@ -28,6 +28,18 @@ month as a grid of weeks instead of a list, `months:3` shows three months, start
 A date shows its place and its notes below the title, when the event in the calendar has them.
 Above a month view there are links to the months before and after, they work without JavaScript by
 asking for a month in the location, `/termine/month:2026-11/`, and a link back to this month.
+
+## How to save one date
+
+A page that a date in the calendar links to can offer that date for saving:
+
+    [calendarevent]
+
+The extension looks for an event whose website is this page and shows a button that saves it as an
+`.ics` file, nothing at all when no calendar mentions the page. `CalendarUrl` in the system settings
+says which calendars are searched, a link of its own says it per page. Nothing is fetched for this,
+the calendars are read the way they already lie on the server, and a calendar that does not mention
+the page is skipped without being parsed.
 
 **Nextcloud:** share a calendar in the calendar app, "Copy link", and use that link as it is. The
 short form says the same thing and keeps a page readable:
